@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GB Relief base map: Leaflet example</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="gbrelief.js"></script>
+<style>html,body,#map{height:100%;margin:0}#map{background:#d6e2e8}</style></head>
+<body><div id="map"></div>
+<script>
+const map = L.map('map').setView([54.4, -3.0], 6);
+const relief = GBRelief.layer('relief').addTo(map);
+L.control.layers({ 'Relief': relief, 'Grey': GBRelief.layer('grey'), 'Geology': GBRelief.layer('geology') }, {
+  'OpenStreetMap (faint)': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { opacity: 0.35, attribution: '&copy; OpenStreetMap contributors' })
+}).addTo(map);
+L.control.scale({ imperial: false }).addTo(map);
+</script></body></html>
