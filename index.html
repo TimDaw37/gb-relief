@@ -85,6 +85,7 @@ select,input[type=text]{width:100%;padding:7px 8px;border:1px solid var(--line);
     <label class="h">Vertical exaggeration</label>
     <div class="row"><input type="range" id="ex" min="1" max="10" step="0.5"><output id="exO"></output></div>
     <label class="chk"><input type="checkbox" id="exAuto"> Automatic (more at small scales)</label>
+    <label class="chk"><input type="checkbox" id="seabed"> Sea floor (EMODnet bathymetry)</label>
     <label class="chk"><input type="checkbox" id="water"> Inland water and foreshore</label>
     <p class="note" id="geoNote" style="display:none">Bedrock by period (BGS Geology 625k). Felsic and mafic intrusions shown separately. Tap the map to read the unit.</p>
   </div>
@@ -113,6 +114,7 @@ select,input[type=text]{width:100%;padding:7px 8px;border:1px solid var(--line);
   <div class="sec about" id="sec-about">
     <p><b>Terrain.</b> 1 m open LiDAR digital terrain models, merged and resampled to 100, 200, 400 and 800 m grids on the British National Grid: Environment Agency LiDAR Composite DTM (England); Welsh Government LiDAR DTM via DataMapWales (Wales); Scottish Government, SEPA, HES and OIC LiDAR via the Scottish Remote Sensing Portal (Scotland). Open Government Licence v3.0.</p>
     <p><b>Gaps.</b> Where no open LiDAR exists (parts of the Highlands and Islands, the Isle of Man) the terrain is GEM-15 v1, an experimental 15 m bare-earth model produced by Google from satellite imagery, CC BY 4.0 (Batchu et al. 2026).</p>
+    <p><b>Sea floor.</b> Beyond the coast, EMODnet Digital Bathymetry DTM 2024 (mean-sea-level version, about 115 m cells, CC BY 4.0; <a href="https://doi.org/10.12770/cf51df64-56f9-4a99-b1aa-36b8d7b743a1">doi:10.12770/cf51df64</a>), as prepared for LiDAR Lens. It compiles surveys of different ages and quality, so straight lines and steps can be survey artefacts. Depths are estimates relative to mean sea level, not Ordnance Datum. Not for navigation.</p>
     <p><b>Coast and water.</b> Land is clipped to mean high water and inland water and foreshore are taken from OS Open Zoomstack. Contains OS data © Crown copyright and database right 2026.</p>
     <p><b>Geology.</b> BGS Geology 625k (DiGMapGB-625) bedrock, coloured by period with the international chronostratigraphic chart colours. Contains British Geological Survey materials © UKRI. Open Government Licence v3.0.</p>
     <p><b>Method.</b> Hillshade from central-difference slopes with a weighted four-direction sun (or a single sun), on a hypsometric tint. Heights are shown to 0.25 m. The finest grid here is 100 m; for the full 1 m LiDAR open <a href="https://lidarlens.sarsen.org/" id="lensLink2">LiDAR Lens</a>.</p>
@@ -123,7 +125,7 @@ select,input[type=text]{width:100%;padding:7px 8px;border:1px solid var(--line);
 <div id="shot"><img id="shotImg" alt="Exported map"><p>Saving is not available here. Press and hold, or right-click, the image to save it.</p><button class="btn" id="shotClose">Close</button></div>
 
 <script id="wk" type="text/plain">
-let META=null,BASE='';const cache=new Map(),MAXC=10;
+let META=null,BASE='',HOFF=100;const cache=new Map(),MAXC=10;
 function sheet(res,i,j){
   const L=META.levels[res];if(!L.sheets.some(s=>s[0]===i&&s[1]===j))return Promise.resolve(null);
   const k=res+'_'+i+'_'+j;const e=cache.get(k);if(e){cache.delete(k);cache.set(k,e);return e}
@@ -141,7 +143,7 @@ async function mosaic(res,c0,r0,w,h){
   for(const {i,j,s} of await Promise.all(jobs)){if(!s)continue;
     const xa=Math.max(gc0,i*SW),xb=Math.min(gc0+W-1,i*SW+SW-1),ya=Math.max(gr0,j*SH),yb=Math.min(gr0+HH-1,j*SH+SH-1);
     for(let gr=ya;gr<=yb;gr++){let so=(gr-j*SH+1)*s.w+(xa-i*SW+1),mo=(gr-gr0)*W+(xa-gc0);
-      for(let gc=xa;gc<=xb;gc++,so++,mo++){Hm[mo]=s.H[so]/4-100;Cm[mo]=s.C[so]}}}
+      for(let gc=xa;gc<=xb;gc++,so++,mo++){Hm[mo]=s.H[so]/4-HOFF;Cm[mo]=s.C[so]}}}
   return {W,HH,Hm,Cm}}
 const PAL={
  atlas:{stops:[[-5,120,150,110],[0,132,165,118],[50,160,185,130],[150,205,205,150],[300,215,190,140],[500,190,155,115],[800,165,135,115],[1100,215,210,205],[1400,250,250,250]],sea:[214,226,232]},
@@ -153,6 +155,9 @@ const GEO=[null,[255,230,25],[253,154,82],[127,198,78],[52,178,201],[129,43,146]
 function lut(p){const s=PAL[p].stops,L=new Float32Array(1501*3);
   for(let k=0;k<1501;k++){const h=k-100;let a=0;while(a<s.length-2&&h>s[a+1][0])a++;
     const t=Math.max(0,Math.min(1,(h-s[a][0])/(s[a+1][0]-s[a][0])));for(let c=0;c<3;c++)L[k*3+c]=s[a][c+1]+(s[a+1][c+1]-s[a][c+1])*t}return L}
+const BST=[[-2000,38,66,112],[-1000,52,88,140],[-500,70,114,166],[-200,92,140,186],[-100,116,162,200],[-60,138,180,212],[-30,162,198,222],[-10,184,212,228],[0,200,222,232],[8,214,230,236]];
+function blut(dark){const L=new Float32Array(2009*3);for(let k=0;k<2009;k++){const h=k-2000;let a=0;while(a<BST.length-2&&h>BST[a+1][0])a++;
+  const t=Math.max(0,Math.min(1,(h-BST[a][0])/(BST[a+1][0]-BST[a][0])));for(let c=0;c<3;c++)L[k*3+c]=(BST[a][c+1]+(BST[a+1][c+1]-BST[a][c+1])*t)*(dark?.42:1)}return L}
 function shade(m,res,S){
   const {W,HH,Hm,Cm}=m,w=W-2,h=HH-2,out=new Uint8ClampedArray(w*h*4),ex=S.ex,r=Math.PI/180;
   const dirs=S.light==='multi'?[[0,.5],[-45,.2],[45,.2],[-90,.1]]:[[0,1]];
@@ -160,22 +165,29 @@ function shade(m,res,S){
   const P=PAL[S.mode==='grey'?'atlas':S.pal],L=lut(S.mode==='grey'?'atlas':S.pal);
   const grey=S.mode==='grey',sea=grey?[240,240,240]:P.sea,fore=grey?[228,228,228]:[sea[0]*.55+236*.45,sea[1]*.55+226*.45,sea[2]*.55+200*.45];
   const wet=S.water;const dry=c=>c>=10||(c===2&&!wet);
+  const night=!grey&&S.pal==='night',BL=blut(night),OTH=grey?[236,236,236]:night?[44,48,52]:[232,229,222],WATER=grey?[226,232,236]:night?[30,44,58]:[196,218,230];
   for(let y=0;y<h;y++){for(let x=0;x<w;x++){
     const i=(y+1)*W+x+1,c=Cm[i],o=(y*w+x)*4;let R,G,B;
-    if(!dry(c)){const col=(c===1&&wet)?fore:sea;R=col[0];G=col[1];B=col[2]}
-    else{
-      const p=(Hm[i+1]-Hm[i-1])*.5/res*ex,q=(Hm[i-W]-Hm[i+W])*.5/res*ex;   // q: northward rise (row index grows southward)
-      const nz=1/Math.sqrt(p*p+q*q+1),nx=-p*nz,ny=-q*nz;let sh=0;
-      for(let k=0;k<Ls.length;k++){const l=Ls[k],v=nx*l[0]+ny*l[1]+nz*l[2];if(v>0)sh+=v}
-      const hv=Hm[i];
+    const p=(Hm[i+1]-Hm[i-1])*.5/res*ex,q=(Hm[i-W]-Hm[i+W])*.5/res*ex;   // q: northward rise (row index grows southward)
+    const nz=1/Math.sqrt(p*p+q*q+1),nx=-p*nz,ny=-q*nz;let sh=0;
+    for(let k=0;k<Ls.length;k++){const l=Ls[k],v=nx*l[0]+ny*l[1]+nz*l[2];if(v>0)sh+=v}
+    const hv=Hm[i];
+    if(dry(c)){
       if(grey){R=G=B=255*(.25+.8*sh)}
       else if(S.mode==='geology'){const g=GEO[c>=10?c-10:17]||GEO[17];const f=.45+.7*sh;R=g[0]*f;G=g[1]*f;B=g[2]*f}
       else{let k=Math.round(hv)+100;k=k<0?0:k>1500?1500:k;const f=S.mode==='tint'?1:(.35+.85*sh);R=L[k*3]*f;G=L[k*3+1]*f;B=L[k*3+2]*f}
-      if(!dry(Cm[i-1])||!dry(Cm[i+1])||!dry(Cm[i-W])||!dry(Cm[i+W])){R*=.75;G*=.75;B*=.75}}
+      if(!dry(Cm[i-1])||!dry(Cm[i+1])||!dry(Cm[i-W])||!dry(Cm[i+W])){R*=.72;G*=.72;B*=.72}}
+    else if(c===2){R=WATER[0];G=WATER[1];B=WATER[2]}
+    else if(c===3){R=OTH[0];G=OTH[1];B=OTH[2];if(Cm[i-1]!==3||Cm[i+1]!==3||Cm[i-W]!==3||Cm[i+W]!==3){R*=.85;G*=.85;B*=.85}}
+    else{
+      if(!S.seabed){R=sea[0];G=sea[1];B=sea[2]}
+      else if(grey){R=G=B=228*(.62+.45*sh)}
+      else{let k=Math.round(hv)+2000;k=k<0?0:k>2008?2008:k;const f=S.mode==='tint'?1:(.62+.45*sh);R=BL[k*3]*f;G=BL[k*3+1]*f;B=BL[k*3+2]*f}
+      if(c===1&&wet){if(grey){R=R*.55+228*.45;G=G*.55+228*.45;B=B*.55+228*.45}else{R=R*.55+236*.45;G=G*.55+226*.45;B=B*.55+200*.45}}}
     out[o]=R;out[o+1]=G;out[o+2]=B;out[o+3]=255}}
   return new ImageData(out,w,h)}
 onmessage=async e=>{const m=e.data;try{
-  if(m.op==='init'){META=m.meta;BASE=m.base;postMessage({id:m.id,ok:1});return}
+  if(m.op==='init'){META=m.meta;BASE=m.base;HOFF=META.hoff||100;postMessage({id:m.id,ok:1});return}
   if(m.op==='render'){const mo=await mosaic(m.res,m.c0,m.r0,m.w,m.h);const im=shade(mo,m.res,m.S);
     const c=new OffscreenCanvas(m.w,m.h);c.getContext('2d').putImageData(im,0,0);const bm=c.transferToImageBitmap();postMessage({id:m.id,ok:1,bm},[bm]);return}
   if(m.op==='query'){const mo=await mosaic(m.res,m.c,m.r,1,1);postMessage({id:m.id,ok:1,h:mo.Hm[4],c:mo.Cm[4]});return}
@@ -197,7 +209,7 @@ const call=(m,t)=>new Promise((res,rej)=>{const id=++seq;pend.set(id,{res,rej});
 await call({op:'init',meta:META,base:new URL('./',location.href).href});
 
 // ---------- state
-const S={mode:'relief',pal:'atlas',light:'multi',az:315,alt:40,ex:3,exAuto:true,water:true};
+const S={mode:'relief',pal:'atlas',light:'multi',az:315,alt:40,ex:3,exAuto:true,water:true,seabed:true};
 const AUTOEX={100:2.5,200:3,400:3.5,800:4};
 const exFor=res=>S.exAuto?AUTOEX[res]:S.ex;
 let dpr=Math.min(window.devicePixelRatio||1,2),cw=0,ch=0;
@@ -263,7 +275,8 @@ function hover(x,y,tap){clearTimeout(hT);hT=setTimeout(async()=>{const [E,N]=scr
   let txt=gridRef(E,N,view.s<60?10:view.s<600?8:6)||(Math.round(E)+' E, '+Math.round(N)+' N');
   try{const r=await call({op:'query',res,c:Math.floor((E-X0)/res),r:Math.floor((Y0-N)/res)});if(q!==hq)return;
     if(r.c>=10||r.c===2)txt+=' · '+Math.round(r.h)+' m'+(r.c===2?' (water surface)':'')+(S.mode==='geology'&&r.c>=10?' · '+UNITS[r.c-10]:'');
-    else if(r.c===1)txt+=' · foreshore';else txt+=' · sea'}catch(e){}
+    else if(r.c===3)txt+=' · outside Great Britain (no data)';
+    else txt+=' · '+(r.h<0?'≈ '+Math.round(-r.h)+' m below':'≈ '+Math.round(r.h)+' m above')+' mean sea level'+(r.c===1?' (foreshore)':'')+' · EMODnet estimate, not for navigation'}catch(e){}
   $('#rtxt').textContent=txt},tap?0:60)}
 $('#readout').innerHTML='<span id="rtxt">'+(innerWidth<=640?'Tap the map for grid ref and height':'Move over or tap the map for grid reference and height')+'</span><a id="lensLink" href="https://lidarlens.sarsen.org/">LiDAR Lens ↗</a>';
 function updateLens(){const [lon,lat]=toLL(view.E,view.N);const z=Math.max(12,Math.min(17,Math.round(Math.log2(156543*Math.cos(lat*Math.PI/180)/Math.max(view.s,1)))));
@@ -299,13 +312,13 @@ $('#pal').onchange=e=>{S.pal=e.target.value;restyle()};
 let slT=0;const slider=(id,key,fmtv)=>{const el=$('#'+id);el.oninput=()=>{S[key]=+el.value;$('#'+id+'O').textContent=fmtv(S[key]);clearTimeout(slT);slT=setTimeout(restyle,120)}};
 slider('az','az',v=>v+'°');slider('alt','alt',v=>v+'°');slider('ex','ex',v=>v+'×');
 $('#ex').addEventListener('input',()=>{S.exAuto=false;$('#exAuto').checked=false});
-$('#exAuto').onchange=e=>{S.exAuto=e.target.checked;restyle()};$('#water').onchange=e=>{S.water=e.target.checked;restyle()};
+$('#exAuto').onchange=e=>{S.exAuto=e.target.checked;restyle()};$('#water').onchange=e=>{S.water=e.target.checked;restyle()};$('#seabed').onchange=e=>{S.seabed=e.target.checked;restyle()};
 function syncUI(){document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.mode));
   document.querySelectorAll('#light button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.light));
   document.querySelectorAll('#fFmt button').forEach(b=>b.classList.toggle('on',b.dataset.v===fmt));
   $('#pal').value=S.pal;$('#palWrap').style.display=(S.mode==='relief'||S.mode==='tint')?'block':'none';$('#geoNote').style.display=S.mode==='geology'?'block':'none';
   $('#az').value=S.az;$('#azO').textContent=S.az+'°';$('#alt').value=S.alt;$('#altO').textContent=S.alt+'°';
-  const curRes=detail&&detail.gen===gen?detail.res:800;$('#ex').value=S.exAuto?exFor(curRes):S.ex;$('#exO').textContent=(S.exAuto?exFor(curRes):S.ex)+'×';$('#exAuto').checked=S.exAuto;$('#water').checked=S.water;
+  const curRes=detail&&detail.gen===gen?detail.res:800;$('#ex').value=S.exAuto?exFor(curRes):S.ex;$('#exO').textContent=(S.exAuto?exFor(curRes):S.ex)+'×';$('#exAuto').checked=S.exAuto;$('#water').checked=S.water;$('#seabed').checked=S.seabed;
   $('#brandSub').textContent={relief:'Shaded relief',grey:'Shaded relief',tint:'Elevation',geology:'Bedrock geology on shaded relief'}[S.mode]+' from open LiDAR';
   const dis=S.mode==='tint';['az','alt','ex'].forEach(i=>$('#'+i).disabled=dis)}
 
@@ -324,6 +337,7 @@ function updateInfo(){const p=exportPlan();placeFrame();
 function credits(){const c=['LiDAR DTMs: Environment Agency (England); Welsh Government, DataMapWales (Wales); Scottish Government, SEPA, HES, OIC, Scottish Remote Sensing Portal (Scotland). Open Government Licence v3.0.',
   'Where no open LiDAR exists: GEM-15 v1 (experimental), produced by Google, CC BY 4.0 (Batchu et al. 2026).',
   'Coastline, inland water and foreshore: OS Open Zoomstack. Contains OS data © Crown copyright and database right 2026.'];
+  if(S.seabed)c.splice(2,0,'Sea floor: EMODnet Digital Bathymetry (DTM 2024), mean sea level, CC BY 4.0. Not for navigation.');
   if(S.mode==='geology')c.push('Bedrock geology: BGS Geology 625k (DiGMapGB-625). Contains British Geological Survey materials © UKRI. Open Government Licence v3.0.');
   c.push('Tim Daw · sarsen.org · lidarlens.sarsen.org');return c}
 function wrap(x,t,maxw){const out=[];let cur='';for(const w of t.split(' ')){const n=cur?cur+' '+w:w;if(x.measureText(n).width>maxw&&cur){out.push(cur);cur=w}else cur=n}if(cur)out.push(cur);return out}
@@ -334,7 +348,7 @@ function overlay(x,W,H,p,ex){const u=Math.min(W,H)/1000,pos=$('#fPos').value,pw=
   const lines=[];x.font=`${fC}px 'Source Sans 3',sans-serif`;credits().forEach(c=>{wrap(x,c,pw-2*pad).forEach(l=>lines.push(l));lines.push('')});lines.pop();
   const subs=[sub,`${Math.round(p.mpp)} m per pixel · British National Grid`+(S.mode==='tint'?'':` · vertical exaggeration ${ex}×`)];
   const legend=S.mode==='geology'?UNITS.slice(1,17):[];const lr=Math.ceil(legend.length/2);
-  let h=pad+(title?fT*1.25:0)+subs.length*fS*1.35+fS*0.6+(5*u+fC*1.6)+fS*0.8+(legend.length?lr*fC*1.5+fC*.8:0)+lines.length*fC*1.3+pad;
+  let h=pad+(title?fT*1.25:0)+subs.length*fS*1.35+fS*0.6+(5*u+fC*1.6)+fS*0.8+(S.seabed&&S.mode!=='grey'?fC*4.5:0)+(legend.length?lr*fC*1.5+fC*.8:0)+lines.length*fC*1.3+pad;
   const bx=pos[1]==='r'?W-pw-18*u:18*u,by=pos[0]==='t'?18*u:H-h-18*u;
   x.fillStyle=seaCol().replace('rgb','rgba').replace(')',',0.9)');x.fillRect(bx,by,pw,h);
   let y=by+pad;x.fillStyle=ink;x.textBaseline='top';
@@ -343,6 +357,9 @@ function overlay(x,W,H,p,ex){const u=Math.min(W,H)/1000,pos=$('#fPos').value,pw=
   y+=fS*0.6;const km=niceKm(p.mpp*(pw-2*pad)*0.6),L=km*1000/p.mpp,bh=Math.max(3,5*u);
   for(let i=0;i<4;i++){x.fillStyle=i%2?'#fff':ink;x.fillRect(bx+pad+i*L/4,y,L/4,bh)}x.strokeStyle=ink;x.lineWidth=Math.max(1,u);x.strokeRect(bx+pad,y,L,bh);
   x.fillStyle=ink;x.font=`${fC}px 'Source Sans 3',sans-serif`;y+=bh+fC*0.3;x.fillText('0',bx+pad-fC*0.25,y);const lab=km+' km';x.fillText(lab,bx+pad+L-x.measureText(lab).width/2,y);y+=fC*1.3+fS*0.8;
+  if(S.seabed&&S.mode!=='grey'){const keys=[[0,'0'],[-50,'50'],[-100,'100'],[-200,'200 m'],[-1000,'1000 m']],cols=['rgb(200,222,232)','rgb(150,189,217)','rgb(116,162,200)','rgb(92,140,186)','rgb(52,88,140)'],kw=(pw-2*pad)/5;
+    x.fillStyle=ink;x.fillText('Sea depth below mean sea level',bx+pad,y);y+=fC*1.4;
+    keys.forEach((k,i)=>{x.fillStyle=cols[i];x.fillRect(bx+pad+i*kw,y,kw,fC*1.1);x.strokeStyle=ink;x.strokeRect(bx+pad+i*kw,y,kw,fC*1.1);x.fillStyle=ink;const t=k[1];x.fillText(t,bx+pad+i*kw+kw/2-x.measureText(t).width/2,y+fC*1.3)});y+=fC*3.1}
   if(legend.length){const cw2=(pw-2*pad)/2,sw=fC*1.1;legend.forEach((t,i)=>{const xx=bx+pad+Math.floor(i/lr)*cw2,yy=y+(i%lr)*fC*1.5;x.fillStyle=GEO_HEX[i];x.fillRect(xx,yy,sw*1.4,sw);x.strokeStyle=ink;x.strokeRect(xx,yy,sw*1.4,sw);x.fillStyle=ink;x.fillText(t,xx+sw*1.8,yy)});y+=lr*fC*1.5+fC*.8}
   for(const l of lines){x.fillText(l,bx+pad,y);y+=fC*1.3}}
 let dl=null;async function getDL(){if(dl)return dl;try{if(window.claude&&window.claude.use)dl=await window.claude.use('downloads')}catch(e){}return dl}

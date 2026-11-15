@@ -29,8 +29,8 @@ def tile(args):
 if __name__=='__main__':
   for z in range(5,12):
     load(z); n=2**z
-    x0=int((-8.8+180)/360*n); x1=int((2.0+180)/360*n)
-    y0=int((1-math.asinh(math.tan(math.radians(61.0)))/math.pi)/2*n); y1=int((1-math.asinh(math.tan(math.radians(49.7)))/math.pi)/2*n)
+    x0=int((-10.5+180)/360*n); x1=int((4.5+180)/360*n)
+    y0=int((1-math.asinh(math.tan(math.radians(61.4)))/math.pi)/2*n); y1=int((1-math.asinh(math.tan(math.radians(49.4)))/math.pi)/2*n)
     jobs=[(z,x,y) for x in range(x0,x1+1) for y in range(y0,y1+1)]
     with Pool(2) as p: k=sum(p.map(tile,jobs,chunksize=16))
     print(V,z,k,'of',len(jobs),flush=True)
