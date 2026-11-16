@@ -38,6 +38,13 @@ The envelope of the BRITICE-CHRONO empirical reconstruction (all 1 ka slices, 31
 | With title, legend and credits | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-1200px.jpg) | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-2400px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-max-extent-2400px.png) | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-6700px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-max-extent-6700px.png) |
 | Without text (for translation) | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-notext-1200px.jpg) | | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-notext-6700px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-max-extent-notext-6700px.png) |
 
+**At 26 ka.** The single 26 ka slice of the same reconstruction (optimum limit, with dashed maximum and dotted minimum limits) and the 26 ka shoreline:
+
+| Version | 1200 px | 2400 px | 6700 px |
+|---|---|---|---|
+| With title, legend and credits | [JPG](images/ice-sheet/bi-ice-sheet-26ka-1200px.jpg) | [JPG](images/ice-sheet/bi-ice-sheet-26ka-2400px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-26ka-2400px.png) | [JPG](images/ice-sheet/bi-ice-sheet-26ka-6700px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-26ka-6700px.png) |
+| Without text | [JPG](images/ice-sheet/bi-ice-sheet-26ka-notext-1200px.jpg) | | [JPG](images/ice-sheet/bi-ice-sheet-26ka-notext-6700px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-26ka-notext-6700px.png) |
+
 Ice limits and palaeotopography: Clark, C.D., Ely, J.C., Fabel, D. & Bradley, S.L. 2022, BRITICE-CHRONO maps and GIS data of the last British-Irish Ice Sheet 31 to 15 ka, PANGAEA, doi:10.1594/PANGAEA.945729, CC BY 4.0; Clark et al. 2022, *Boreas* 51, 699–758, doi:10.1111/bor.12594. Scripts in `scripts/ice-sheet/`.
 
 ## Base-map tiles (Leaflet)
