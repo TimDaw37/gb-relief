@@ -17,12 +17,25 @@ Shaded relief and bedrock geology maps of Great Britain and the surrounding sea 
 
 All images are on the British National Grid (EPSG:27700). Vertical exaggeration is 3.5×, 3× and 2.5× respectively. Each image carries its title, scale bar and the full data credits.
 
+## Britain and Ireland
+
+The same treatment for both islands together, on a Lambert azimuthal equal-area projection (ETRS89, centred 54° N, 4.5° W) that suits both. Ireland, the Isle of Man and the gaps in Scotland's LiDAR are GEM-15. The Irish LiDAR now in LiDAR Lens covers a few per cent of the island at 0.5–1 m and adds nothing visible at these scales. Credits run along a footer strip.
+
+| Version | 1000 px (940 m grid) | 3500 px (270 m grid) | 7000 px (134 m grid) |
+|---|---|---|---|
+| Relief and sea floor | [JPG](images/britain-ireland-relief-1000px.jpg) | [JPG](images/britain-ireland-relief-3500px.jpg) · [PNG](images/britain-ireland-relief-3500px.png) | [JPG](images/britain-ireland-relief-7000px.jpg) · [PNG](images/britain-ireland-relief-7000px.png) |
+| Grey hillshade | [JPG](images/britain-ireland-grey-1000px.jpg) | [JPG](images/britain-ireland-grey-3500px.jpg) · [PNG](images/britain-ireland-grey-3500px.png) | [JPG](images/britain-ireland-grey-7000px.jpg) · [PNG](images/britain-ireland-grey-7000px.png) |
+| Elevation and depth tint | [JPG](images/britain-ireland-tint-1000px.jpg) | [JPG](images/britain-ireland-tint-3500px.jpg) · [PNG](images/britain-ireland-tint-3500px.png) | [JPG](images/britain-ireland-tint-7000px.jpg) · [PNG](images/britain-ireland-tint-7000px.png) |
+
+No geology version yet: BGS 625k covers Great Britain only. GSI's 1:500,000 bedrock map for Ireland (CC BY 4.0) would complete it.
+
 ## Base-map tiles (Leaflet)
 
 ```html
 <script src="https://timdaw37.github.io/gb-relief/gbrelief.js"></script>
 <script>
-  GBRelief.layer('relief').addTo(map);   // or 'grey', 'geology'
+  GBRelief.layer('relief').addTo(map);      // Great Britain: 'relief', 'grey' or 'geology'
+  GBRelief.layer('relief-bi').addTo(map);   // Britain and Ireland: 'relief-bi' or 'grey-bi'
 </script>
 ```
 
@@ -37,10 +50,11 @@ The tiles include the sea floor out to the edge of the British National Grid fra
 
   All are under the Open Government Licence v3.0. They were read from the LiDAR Lens overview tiles, which are LiDAR first, at about 90 m. In the gaps without open LiDAR (parts of the Highlands and Islands, and the Isle of Man), the terrain is GEM-15 v1. This is Google's experimental 15 m bare-earth model, CC BY 4.0 (Batchu et al. 2026).
 - **Sea floor.** EMODnet Digital Bathymetry DTM 2024, mean-sea-level version, about 115 m cells, CC BY 4.0 ([doi:10.12770/cf51df64-56f9-4a99-b1aa-36b8d7b743a1](https://doi.org/10.12770/cf51df64-56f9-4a99-b1aa-36b8d7b743a1)), read from the LiDAR Lens seabed tiles (zoom 10). It is shaded like the land, with a blue depth tint. It compiles surveys of different ages and quality, so straight lines and steps can be survey artefacts. Depths are relative to mean sea level, not Ordnance Datum. Not for navigation.
+- **Ireland.** For the Britain-and-Ireland maps: GEM-15 from the LiDAR Lens Irish tiles; coastline from the LiDAR Lens coast mask (OpenStreetMap land polygons, ODbL) outside Great Britain; the larger Irish loughs from Natural Earth; France flat from Natural Earth.
 - **Coast and water.** Land is clipped to mean high water using OS Open Zoomstack. Inland water (National and Regional water bodies) and foreshore also come from Zoomstack. This removes the LiDAR flown over the sea and in estuaries.
 - **Geology.** BGS Geology 625k (DiGMapGB-625) bedrock. Units are coloured by period with the ICS chart colours. Igneous intrusions are coloured by composition, felsic or mafic.
 - **Shading.** Central-difference slopes and a four-direction sun: 315° at weight 0.5, 270° and 0° at 0.2 each, and 225° at 0.1, all at 40° elevation. The relief and geology versions lay this shading over the tint or the geology colours.
-- **Rebuild.** The scripts are in `scripts/`. Run them in order: `fetch.py`, `prep.py`, `fetch_seabed.py`, `prep_sea.py`, `mask.py`, `geol.py`, `render3.py`, `build_sheets.py`, `cut_tiles.py`.
+- **Rebuild.** The scripts are in `scripts/`. Run them in order: `fetch.py`, `prep.py`, `fetch_seabed.py`, `prep_sea.py`, `mask.py`, `geol.py`, `render3.py`, `build_sheets.py`, `cut_tiles.py`; Britain and Ireland: `fetch_bi.py`, `prep_bi.py`, `render_bi.py`, then `cut_tiles.py relief-bi` and `grey-bi`.
 
 ## Licence
 
