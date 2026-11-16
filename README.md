@@ -29,6 +29,17 @@ The same treatment for both islands together, on a Lambert azimuthal equal-area 
 
 No geology version yet: BGS 625k covers Great Britain only. GSI's 1:500,000 bedrock map for Ireland (CC BY 4.0) would complete it.
 
+## Last British–Irish Ice Sheet: maximum extent
+
+The envelope of the BRITICE-CHRONO empirical reconstruction (all 1 ka slices, 31–15 ka; Clark et al. 2022), on the relief and sea floor, with the land exposed at 26 ka from the BRITICE-CHRONO glacio-isostatic palaeotopography and the present coastline drawn through the ice. The margin is diachronous: different sectors reached it at different times. The ice shown includes the western margin of the Fennoscandian Ice Sheet. Lambert azimuthal equal-area, 55° N 3° W.
+
+| Version | 1200 px | 2400 px | 6700 px |
+|---|---|---|---|
+| With title, legend and credits | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-1200px.jpg) | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-2400px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-max-extent-2400px.png) | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-6700px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-max-extent-6700px.png) |
+| Without text (for translation) | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-notext-1200px.jpg) | | [JPG](images/ice-sheet/bi-ice-sheet-max-extent-notext-6700px.jpg) · [PNG](images/ice-sheet/bi-ice-sheet-max-extent-notext-6700px.png) |
+
+Ice limits and palaeotopography: Clark, C.D., Ely, J.C., Fabel, D. & Bradley, S.L. 2022, BRITICE-CHRONO maps and GIS data of the last British-Irish Ice Sheet 31 to 15 ka, PANGAEA, doi:10.1594/PANGAEA.945729, CC BY 4.0; Clark et al. 2022, *Boreas* 51, 699–758, doi:10.1111/bor.12594. Scripts in `scripts/ice-sheet/`.
+
 ## Base-map tiles (Leaflet)
 
 ```html
